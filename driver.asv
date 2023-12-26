@@ -9,6 +9,8 @@ exact_y = @(x,y) x*(1-x)*(1-2*y);
 
 f = @(x,y) -2*x*(x-1)-2*y*(y-1);
 
+% h 
+
 % quadrature rule
 n_int_xi  = 3;              % number of quadrature points in xi-direction
 n_int_eta = 3;              % number of quadrature points in eta-direction
@@ -136,6 +138,7 @@ for ee = 1 : n_el
            else
            % do something for non-zero g boundary condition
            
+           F(PP) = F(PP) - k_ele(aa,bb) * g_function(,);
            
            end 
        end
