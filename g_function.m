@@ -8,6 +8,5 @@ function g_value = g_function(x,y)
         g_value = 0;
     end
 end
-
 % 
 
