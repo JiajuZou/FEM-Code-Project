@@ -135,6 +135,8 @@ for ee = 1 : n_el
               K(PP, QQ) = K(PP, QQ) + k_ele(aa, bb);
            else
            % do something for non-zero g boundary condition
+           % 
+           % 
            
            
            end 
