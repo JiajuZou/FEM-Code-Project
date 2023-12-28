@@ -18,8 +18,8 @@ n_int     = n_int_xi * n_int_eta;
 % FEM mesh settings
 n_en = 4;                   % 4-node quadrilateral element
 
-n_el_x = 100;               % number of element in x-direction
-n_el_y = 100;               % number of element in y-direction
+n_el_x = 15;               % number of element in x-direction
+n_el_y = 15;               % number of element in y-direction
 n_el   = n_el_x * n_el_y;   % total number of element in 2D domain
 
 n_np_x = n_el_x + 1;        % number of node points in x-direction
@@ -84,10 +84,6 @@ for ee = 1 : n_el
 
    x_ele = x_coor( IEN(1:n_en, ee) );
    y_ele = y_coor( IEN(1:n_en, ee) );
-   
-   for bb = 1 : n_en
-       g_ele(bb) = g_function(x_ele(bb),y_ele(bb));
-   end
 
    % loop over quadrature points   
    for ll = 1 : n_int
@@ -124,6 +120,7 @@ for ee = 1 : n_el
          Nb_y = (Nb_xi * (-dx_deta) + Nb_eta * dx_dxi)  / detJ;
 
          k_ele(aa,bb) = k_ele(aa,bb) + weight(ll) * detJ * kappa * ( Na_x * Nb_x + Na_y * Nb_y);
+         g_ele(bb)    = g_ele(bb) + g_function();
 
        end % end of bb-loop
      end % end of aa-loop
@@ -142,6 +139,7 @@ for ee = 1 : n_el
            % do something for non-zero g boundary condition
            % 
            F(PP) = F(PP) - k_ele(aa,bb) * g_ele(bb);
+           
            
            end 
        end
