@@ -59,17 +59,35 @@ for ey = 1 : n_el_y
   end
 end
 
+% Q(a) the whole D boundary
+% ID array
+% ID = zeros(n_np, 1);
+% counter = 1;
+% for ny = 2 : n_np_y - 1
+%   for nx = 2 : n_np_x - 1
+%     ID( (ny-1)*n_np_x + nx ) = counter;
+%     counter = counter + 1;
+%   end
+% end
+
+% Q(b) the D boundary and the N boundary
+% ID = 0 if nodes on D boundary
 % ID array
 ID = zeros(n_np, 1);
 counter = 1;
-for ny = 2 : n_np_y - 1
+for ny = 1 : n_np_y
   for nx = 2 : n_np_x - 1
     ID( (ny-1)*n_np_x + nx ) = counter;
     counter = counter + 1;
   end
 end
 
-n_eq = n_np - n_np_x * 2 - n_np_y * 2 + 4;
+% Q(a) D boundary on the whole sides
+% n_eq = n_np - n_np_x * 2 - n_np_y * 2 + 4;
+
+%Q(b) D boundary on right and left sides, N boundary on top and bottom
+%sides, the 4 corner points are in D boundary
+n_eq = n_np - n_np_y * 2;
 
 LM = ID(IEN);
 
@@ -85,8 +103,9 @@ for ee = 1 : n_el
    x_ele = x_coor( IEN(1:n_en, ee) );
    y_ele = y_coor( IEN(1:n_en, ee) );
    
+   %Dirichlet boundary on each element
    for bb = 1 : n_en
-       g_ele(bb) = g_function(x_ele(bb),y_ele(bb));
+       g_ele(bb) = g_function_b(x_ele(bb),y_ele(bb));
    end
 
    % loop over quadrature points   
@@ -140,11 +159,12 @@ for ee = 1 : n_el
               K(PP, QQ) = K(PP, QQ) + k_ele(aa, bb);
            else
            % do something for non-zero g boundary condition
-           % 
-           F(PP) = F(PP) - k_ele(aa,bb) * g_ele(bb);
+           F(PP) = F(PP) - k_ele(aa,bb) * g_ele(bb); % Refer to L7 notes, local/element perspective
            
            end 
        end
+       
+       
      end
    end
 end % end of element loop
