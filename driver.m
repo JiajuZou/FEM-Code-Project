@@ -15,12 +15,13 @@ n_int_eta = 3;              % number of quadrature points in eta-direction
 n_int_h   = 3;              % number of quadrature points on the Neumann boundary
 n_int     = n_int_xi * n_int_eta;
 [xi, eta, weight] = Gauss2D(n_int_xi, n_int_eta);
+[xih,weighth]     = Gauss(n_int_h,-1,1);
 
 % FEM mesh settings
 n_en = 4;                   % 4-node quadrilateral element
 
-n_el_x = 10;               % number of element in x-direction
-n_el_y = 10;               % number of element in y-direction
+n_el_x = 4;               % number of element in x-direction
+n_el_y = 4;               % number of element in y-direction
 n_el   = n_el_x * n_el_y;   % total number of element in 2D domain
 
 n_np_x = n_el_x + 1;        % number of node points in x-direction
@@ -62,33 +63,49 @@ end
 
 % Q(a) the whole D boundary
 % ID array
-% ID = zeros(n_np, 1);
-% counter = 1;
-% for ny = 2 : n_np_y - 1
-%   for nx = 2 : n_np_x - 1
-%     ID( (ny-1)*n_np_x + nx ) = counter;
-%     counter = counter + 1;
-%   end
-% end
-
-% Q(b) the D boundary and the N boundary
-% ID = 0 if nodes on D boundary
-% ID array
 ID = zeros(n_np, 1);
 counter = 1;
-for ny = 1 : n_np_y
+for ny = 2 : n_np_y - 1
   for nx = 2 : n_np_x - 1
     ID( (ny-1)*n_np_x + nx ) = counter;
     counter = counter + 1;
   end
 end
 
+% % Q(b) the D boundary and the N boundary
+% % ID = 0 if nodes on D boundary
+% % ID array
+% ID = zeros(n_np, 1);
+% counter = 1;
+% for ny = 1 : n_np_y
+%   for nx = 2 : n_np_x - 1
+%     ID( (ny-1)*n_np_x + nx ) = counter;
+%     counter = counter + 1;
+%   end
+% end
+
 % Q(a) D boundary on the whole sides
-% n_eq = n_np - n_np_x * 2 - n_np_y * 2 + 4;
+n_eq = n_np - n_np_x * 2 - n_np_y * 2 + 4;
 
 %Q(b) D boundary on right and left sides, N boundary on top and bottom
 %sides, the 4 corner points are in D boundary only
-n_eq = n_np - n_np_y * 2;
+% n_eq = n_np - n_np_y * 2;
+
+% Construct two matrixes to store the D and N boundary data
+g_b = ones(n_np,1); % g = 1 in this case
+for ny = 1 : n_np_y
+    for nx = 2 : n_np_x -1 
+        g_b((ny-1) * n_np_x + nx) = 0; % Make the L and R sides to be 1, the remaind to be 0
+    end
+end
+
+h_b = ones(n_np,1); % h = 1 in this case
+for ny = 2 : n_np_y - 1 
+    for nx = 1 : n_np_x
+        h_b((ny-1) * n_np_x + nx) = 0; % Make the T and B sides to be 1, the remaind to be 0
+    end
+end
+
 
 LM = ID(IEN);
 
@@ -99,12 +116,16 @@ F = zeros(n_eq, 1);
 for ee = 1 : n_el
    k_ele = zeros(n_en, n_en);
    f_ele = zeros(n_en, 1);
-   g_ele = zeros(n_en, 1); %the g boundary on each element
-   h_ele = zeros(n_en, 1); %the h boundary on each element
+%    g_ele = zeros(n_en, 1); %the g boundary on each element
+%    h_ele = zeros(n_en, 1); %the h boundary on each element
    Nah   = zeros(n_en, 1); %Na * h on the Neumann boundary of each element
+   kg    = zeros(n_en, 1); %k_ab * g_b on the Dirichlet boundary of each element
 
    x_ele = x_coor( IEN(1:n_en, ee) );
    y_ele = y_coor( IEN(1:n_en, ee) );
+   
+   g_ele = g_b(IEN(1:n_en,ee));
+   h_ele = h_b(IEN(1:n_en,ee));
    
 %    %Q(a) whole Dirichlet boundary
 %    %Dirichlet boundary on each element
@@ -112,17 +133,17 @@ for ee = 1 : n_el
 %        g_ele(bb) = g_function(x_ele(bb),y_ele(bb));
 %    end
 
-   % Q(b) Dirichlet boundary on L and R sides
-   % Dirichlet boundary on each element
-   for bb = 1 : n_en
-       g_ele(bb) = g_function_b(x_ele(bb),y_ele(bb));
-   end
-   
-   % Q(b) Neumann boundary on T and B sides
-   % Neumann boundary on each element
-   for bb = 1 : n_en
-      h_ele(bb) = h_function_b(x_ele(bb),y_ele(bb));
-   end
+%    % Q(b) Dirichlet boundary on L and R sides
+%    % Dirichlet boundary on each element
+%    for bb = 1 : n_en
+%        g_ele(bb) = g_function_b(x_ele(bb),y_ele(bb));
+%    end
+%    
+%    % Q(b) Neumann boundary on T and B sides
+%    % Neumann boundary on each element
+%    for bb = 1 : n_en
+%       h_ele(bb) = h_function_b(x_ele(bb),y_ele(bb));
+%    end
 
    % loop over quadrature points   
    for ll = 1 : n_int
@@ -189,11 +210,17 @@ for ee = 1 : n_el
        
    end
    
-   % Refer to the f_ele formulation in L7 notes
-   % Plus the Neumann boundary terms as follows
-   for aa = 1 : n_en
-       f_ele(aa) = f_ele(aa) + Nah(aa);
-   end
+%    % Refer to the f_ele formulation in L7 notes
+%    % Plus the Neumann boundary terms as follows
+%    for aa = 1 : n_en 
+%        for bb = 1 : n_en
+%            kg = kg + k_ele(aa,bb) * g_ele(bb);
+%        end
+%        f_ele(aa) = f_ele(aa) + Nah(aa) - kg(aa);
+%    end
+   
+   % calculate f_ele based on the formulation of L7 notes
+   f_ele = f_ele + Nah - k_ele * g_ele;
    
    % global assembly
    for aa = 1 : n_en
@@ -206,7 +233,7 @@ for ee = 1 : n_el
               K(PP, QQ) = K(PP, QQ) + k_ele(aa, bb);
            else
            % do something for non-zero g boundary condition
-           F(PP) = F(PP) - k_ele(aa,bb) * g_ele(bb); % Refer to L7 notes, local/element perspective
+%            F(PP) = F(PP) - k_ele(aa,bb) * g_ele(bb); % Refer to L7 notes, local/element perspective
            
            end
        end
@@ -224,6 +251,8 @@ for ii = 1 : n_np
   index = ID(ii);
   if index > 0
     disp(ii) = d_temp(index);
+  else
+    disp(ii) = g_b(ii); % g boundary data, g = 1
   end
 end
 
