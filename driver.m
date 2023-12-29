@@ -189,6 +189,12 @@ for ee = 1 : n_el
        
    end
    
+   % Refer to the f_ele formulation in L7 notes
+   % Plus the Neumann boundary terms as follows
+   for aa = 1 : n_en
+       f_ele(aa) = f_ele(aa) + Nah(aa);
+   end
+   
    % global assembly
    for aa = 1 : n_en
      PP = LM(aa, ee);
@@ -202,7 +208,7 @@ for ee = 1 : n_el
            % do something for non-zero g boundary condition
            F(PP) = F(PP) - k_ele(aa,bb) * g_ele(bb); % Refer to L7 notes, local/element perspective
            
-           end 
+           end
        end
      end
    end

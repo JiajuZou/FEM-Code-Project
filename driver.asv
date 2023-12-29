@@ -101,6 +101,7 @@ for ee = 1 : n_el
    f_ele = zeros(n_en, 1);
    g_ele = zeros(n_en, 1); %the g boundary on each element
    h_ele = zeros(n_en, 1); %the h boundary on each element
+   Nah   = zeros(n_en, 1); %Na * h on the Neumann boundary of each element
 
    x_ele = x_coor( IEN(1:n_en, ee) );
    y_ele = y_coor( IEN(1:n_en, ee) );
@@ -173,13 +174,25 @@ for ee = 1 : n_el
        for aa = 1 : 2
            dx_dxi_bottom = dx_dxi_bottom + x_ele(aa) * Quad(aa,xi(ll_h),-1); % -1 makes the zero in Quad
        end
-       
        for aa = 1 : 2
-           Nah(aa) = Nah(aa) + weight(ll_h) * Quad(aa,xi(ll_h),-1) * h_ele;
+           Nah(aa) = Nah(aa) + weight(ll_h) * Quad(aa,xi(ll_h),-1) * h_ele(aa) * dx_dxi_bottom;
        end
        
+       % Top boundary of one element
+       dx_dxi_top = 0.0;
+       for aa = 3 : 4
+           dx_dxi_top = dx_dxi_top + x_ele(aa) * Quad(aa,xi(ll_h),1); % +1 makes the zero in Quad
+       end
+       for aa = 3 : 4
+           Nah(aa) = Nah(aa) + weight(ll_h) * Quad(aa,xi(ll_h),1) * h_ele(aa) * dx_dxi_top;
+       end
        
-       
+   end
+   
+   % Refer to the f_ele formulation on L7 notes
+   % Plus the Neumann noundary
+   for aa = 1 : n_en
+       f_ele(aa) = f_ele(aa) + Nah(aa);
    end
    
    % global assembly
@@ -195,9 +208,10 @@ for ee = 1 : n_el
            % do something for non-zero g boundary condition
            F(PP) = F(PP) - k_ele(aa,bb) * g_ele(bb); % Refer to L7 notes, local/element perspective
            
-           end 
+           end
        end
      end
+     
    end
 end % end of element loop
 
