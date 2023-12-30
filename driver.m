@@ -20,8 +20,9 @@ n_int     = n_int_xi * n_int_eta;
 % FEM mesh settings
 n_en = 4;                   % 4-node quadrilateral element
 
-n_el_x = 100;                 % number of element in x-direction
-n_el_y = 100;                 % number of element in y-direction
+for ele = 2:2:16
+n_el_x = ele;                 % number of element in x-direction
+n_el_y = ele;                 % number of element in y-direction
 n_el   = n_el_x * n_el_y;   % total number of element in 2D domain
 
 n_np_x = n_el_x + 1;        % number of node points in x-direction
@@ -257,6 +258,9 @@ for ii = 1 : n_np
 end
 
 % save the solution to file
-save("FEM_solution", "disp", "n_el_x", "n_el_y", "exact", "exact_x", "exact_y");
+% save("FEM_solution", "disp", "n_el_x", "n_el_y", "exact", "exact_x", "exact_y");
+save(sprintf('FEM_solution_%d.mat', ele), "disp", "n_el_x", "n_el_y", "exact", "exact_x", "exact_y");
+
+end
 
 % EOF
