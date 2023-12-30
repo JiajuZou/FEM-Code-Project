@@ -1,4 +1,4 @@
-clear all; clc;
+% clear all; clc;
 
 kappa = 1.0; % isotropic homogeneous heat conductivity
 rho   = 1.0; % density
@@ -13,8 +13,8 @@ exact_y = @(x,y) x*(1-x)*(1-2*y);
 
 alpha = 0;                  % explicit forward Euler method
 
-T_final = 1;
-dt      = 3e-04;
+T_final = 0.1;
+dt      = 2e-4;           % time step size, whose upper bound is 2/lambda since alpha = 0
 t       = 0 : dt : T_final; % time sub-interval
 NN      = T_final / dt;
 
