@@ -11,7 +11,7 @@ cap   = 1.0; % heat capacity
 
 %f = @(x,y) -2*x*(x-1)-2*y*(y-1);
 
-alpha = 0.5;
+alpha = 0.5;                % unconditionaly stable
 
 T_final = 10.0;             % time period T = 10
 dt      = 0.1;              % time step size
@@ -219,44 +219,42 @@ for n = 1 : NN
 %     %calculate the largest eigenvalue of the matrix M-1K
 %     lambda = eigs( inv(M) * K, 1 );
     
-%     % set initial conditions
-%     dn = zeros(n_eq, 1);   % initial temperature is zero
-%     vn = M \ (F - K * dn); % solve M matrix to determine vn at initial time
-%     disp = zeros(n_np, 1);
-%     
-%     % insert the solution vector back with the g-data
-%     for ii = 1 : n_np
-%         index = ID(ii);
-%         if index > 0
-%             disp(ii) = dn(index);
-%         end
-%     end
-%     save("HEAT"+int2str(1000000), "disp", "n_el_x", "n_el_y");
-%     
-%     LEFT = M + alpha * dt * K;
-%     
-%     for n = 1 : NN
-%         % prediction
-%         tilde_d = dn + (1-alpha) * dt * vn;
-%         
-%         % correction
-%         RIGHT = F - K * tilde_d;
-%         vn = LEFT \ RIGHT;
-%         dn = tilde_d + alpha * dt * vn;
-%         
-%         disp = zeros(n_np, 1);
-%         
-%         % insert the solution vector back with the g-data
-%         for ii = 1 : n_np
-%             index = ID(ii);
-%             if index > 0
-%                 disp(ii) = dn(index);
-%             end
-%         end
-%         
-%         % save the solution to file
-%         save("HEAT"+int2str(1000000+n), "disp", "n_el_x", "n_el_y");
-%     end
+    % set initial conditions
+    dn = zeros(n_eq, 1);   % initial temperature is zero
+    vn = M \ (F - K * dn); % solve M matrix to determine vn at initial time
+    disp = zeros(n_np, 1);
+    
+    % insert the solution vector back with the g-data
+    for ii = 1 : n_np
+        index = ID(ii);
+        if index > 0
+            disp(ii) = dn(index);
+        end
+    end
+    save("HEAT"+int2str(1000000), "disp", "n_el_x", "n_el_y");
+    
+    LEFT = M + alpha * dt * K;
+    
+    % prediction
+    tilde_d = dn + (1-alpha) * dt * vn;
+    
+    % correction
+    RIGHT = F - K * tilde_d;
+    vn = LEFT \ RIGHT;
+    dn = tilde_d + alpha * dt * vn;
+    
+    disp = zeros(n_np, 1);
+    
+    % insert the solution vector back with the g-data
+    for ii = 1 : n_np
+        index = ID(ii);
+        if index > 0
+            disp(ii) = dn(index);
+        end
+    end
+    
+    % save the solution to file
+    save("HEAT"+int2str(1000000+n), "disp", "n_el_x", "n_el_y");
 
 end
 % EOF
