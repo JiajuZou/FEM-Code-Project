@@ -12,7 +12,7 @@ f = @(x,y) -2*x*(x-1)-2*y*(y-1);
 % quadrature rule
 n_int_xi  = 3;              % number of quadrature points in xi-direction
 n_int_eta = 3;              % number of quadrature points in eta-direction
-n_int_h   = 3;              % number of quadrature points on the Neumann boundary
+n_int_h   = 10;              % number of quadrature points on the Neumann boundary
 n_int     = n_int_xi * n_int_eta;
 [xi, eta, weight] = Gauss2D(n_int_xi, n_int_eta);
 [xih,weighth]     = Gauss(n_int_h,-1,1); % Used for the Neumann boundary integration
@@ -21,9 +21,9 @@ n_int     = n_int_xi * n_int_eta;
 n_en = 4;                   % 4-node quadrilateral element
 
 ele = [10,100];        % Different number of elements
-for i = 1:length(ele)
-n_el_x = ele(i);                 % number of element in x-direction
-n_el_y = ele(i);                 % number of element in y-direction
+% for i = 1:length(ele)
+n_el_x = 4;                 % number of element in x-direction
+n_el_y = 4;                 % number of element in y-direction
 n_el   = n_el_x * n_el_y;   % total number of element in 2D domain
 
 n_np_x = n_el_x + 1;        % number of node points in x-direction
@@ -65,34 +65,34 @@ end
 
 % Q(a) the whole D boundary
 % ID array
-ID = zeros(n_np, 1);
-counter = 1;
-for ny = 2 : n_np_y - 1
-  for nx = 2 : n_np_x - 1
-    ID( (ny-1)*n_np_x + nx ) = counter;
-    counter = counter + 1;
-  end
-end
-
-% % Q(b) the D boundary and the N boundary
-% % ID = 0 if nodes on D boundary, so the L and R sides are zeros
-% % ID array
 % ID = zeros(n_np, 1);
 % counter = 1;
-% for ny = 1 : n_np_y
+% for ny = 2 : n_np_y - 1
 %   for nx = 2 : n_np_x - 1
 %     ID( (ny-1)*n_np_x + nx ) = counter;
 %     counter = counter + 1;
 %   end
 % end
 
+% Q(b) the D boundary and the N boundary
+% ID = 0 if nodes on D boundary, so the L and R sides are zeros
+% ID array
+ID = zeros(n_np, 1);
+counter = 1;
+for ny = 1 : n_np_y
+  for nx = 2 : n_np_x - 1
+    ID( (ny-1)*n_np_x + nx ) = counter;
+    counter = counter + 1;
+  end
+end
+
 % Q(a) D boundary on the whole sides
-n_eq = n_np - n_np_x * 2 - n_np_y * 2 + 4;
+% n_eq = n_np - n_np_x * 2 - n_np_y * 2 + 4;
 
 % Q(b) D boundary on right and left sides, N boundary on top and bottom
 %sides, the 4 corner points are in D boundary only
 % the number of equations = number of nodes - number of D nodes
-% n_eq = n_np - n_np_y * 2;
+n_eq = n_np - n_np_y * 2;
 
 % Construct two matrixes to store the D and N boundary data
 % 1 ----0-----1                 1 ----1-----1
@@ -102,17 +102,18 @@ n_eq = n_np - n_np_x * 2 - n_np_y * 2 + 4;
 % 1 ----0-----1                 0 ----0-----0
 % 1 ----0-----1                 1 ----1-----1
 g_b = ones(n_np,1); % set g = 1 in this case
-for ny = 2 : n_np_y - 1 
+for ny = 1 : n_np_y 
     for nx = 2 : n_np_x - 1 
         g_b((ny-1) * n_np_x + nx) = 0; % Make the L and R sides to be 1, the remaind to be 0
     end
 end
-% h_b = ones(n_np,1); % h = 1 in this case
-% for ny = 2 : n_np_y - 1 
-%     for nx = 1 : n_np_x
-%         h_b((ny-1) * n_np_x + nx) = 0; % Make the T and B sides to be 1, the remaind to be 0
-%     end
-% end
+
+h_b = ones(n_np,1); % set h = 1 in this case
+for ny = 2 : n_np_y - 1 
+    for nx = 1 : n_np_x
+        h_b((ny-1) * n_np_x + nx) = 0; % Make the T and B sides to be 1, the remaind to be 0
+    end
+end
 
 LM = ID(IEN);
 
@@ -124,7 +125,7 @@ for ee = 1 : n_el
    k_ele = zeros(n_en, n_en);
    f_ele = zeros(n_en, 1);
 %    g_ele = zeros(n_en, 1); %the g boundary on each element
-   h_ele = zeros(n_en, 1); %the h boundary on each element
+%    h_ele = zeros(n_en, 1); %the h boundary on each element
    Nah   = zeros(n_en, 1); %Na * h on the Neumann boundary of each element
    kg    = zeros(n_en, 1); %k_ab * g_b on the Dirichlet boundary of each element
 
@@ -132,7 +133,7 @@ for ee = 1 : n_el
    y_ele = y_coor( IEN(1:n_en, ee) );
    
    g_ele = g_b(IEN(1:n_en,ee));
-%    h_ele = h_b(IEN(1:n_en,ee));
+   h_ele = h_b(IEN(1:n_en,ee));
    
    %Q(a) whole Dirichlet boundary
    %Dirichlet boundary on each element
@@ -200,7 +201,7 @@ for ee = 1 : n_el
        % Bottom boundary of one element
        dx_dxi_bottom = 0.0;
        for aa = 1 : 2
-           dx_dxi_bottom = dx_dxi_bottom + x_ele(aa) * Quad(aa,xih(ll_h),-1); % -1 makes the zero in Quad
+           dx_dxi_bottom = dx_dxi_bottom + x_ele(aa) * Quad_grad(aa,xih(ll_h),-1); % -1 makes the zero in Quad
        end
        for aa = 1 : 2
            Nah(aa) = Nah(aa) + weighth(ll_h) * Quad(aa,xih(ll_h),-1) * h_ele(aa) * dx_dxi_bottom;
@@ -209,7 +210,7 @@ for ee = 1 : n_el
        % Top boundary of one element
        dx_dxi_top = 0.0;
        for aa = 3 : 4
-           dx_dxi_top = dx_dxi_top + x_ele(aa) * Quad(aa,xih(ll_h),1); % +1 makes the zero in Quad
+           dx_dxi_top = dx_dxi_top + x_ele(aa) * Quad_grad(aa,xih(ll_h),1); % +1 makes the zero in Quad
        end
        for aa = 3 : 4
            Nah(aa) = Nah(aa) + weighth(ll_h) * Quad(aa,xih(ll_h),1) * h_ele(aa) * dx_dxi_top;
@@ -254,14 +255,14 @@ for ii = 1 : n_np
   else
     % g boundary data where ID = 0; 
     % the value should be the same with g_function
-    disp(ii) = -2; 
+    disp(ii) = 1; 
   end
 end
 
 % save the solution to file
 save("FEM_solution", "disp", "n_el_x", "n_el_y", "exact", "exact_x", "exact_y");
-save(sprintf('FEM_solution_%d.mat', ele(i)), "disp", "n_el_x", "n_el_y", "exact", "exact_x", "exact_y");
+% save(sprintf('FEM_solution_%d.mat', ele(i)), "disp", "n_el_x", "n_el_y", "exact", "exact_x", "exact_y");
 
-end
+% end
 
 % EOF

@@ -1,16 +1,16 @@
 clear all; clc;
 
-element  = [10,100];     % different number of elements
+element  = [4];     % different number of elements
 Error_hh = zeros(length(element),3); % matrix to store the error
 
 % manufactured solution
 % how to add them ?
 g = 1;    %Given g boundary 
-h = 0.1;  %Given h boundary
+h = 1;  %Given h boundary
 
 for index = 1:length(element)
-load(sprintf('FEM_solution_%d.mat', element(index)));
-% load("FEM_solution_2.mat");
+% load(sprintf('FEM_solution_%d.mat', element(index)));
+load("FEM_solution.mat");
 
 n_el = n_el_x * n_el_y;
 n_en = 4;
@@ -23,8 +23,8 @@ n_np_x = n_el_x + 1;
 n_np_y = n_el_y + 1;
 n_np   = n_np_x * n_np_y;
 
-n_eq = n_np - n_np_x - n_np_x - n_np_y - n_np_y + 4; % All D boundary
-% n_eq = n_np - n_np_y - n_np_y;                       % D and N boundary
+% n_eq = n_np - n_np_x - n_np_x - n_np_y - n_np_y + 4; % All D boundary
+n_eq = n_np - n_np_y - n_np_y;                       % D and N boundary
 
 hh_x = 1.0 / n_el_x;
 hh_y = 1.0 / n_el_y;
@@ -108,16 +108,16 @@ Error_hh(index,2) = L2error;
 Error_hh(index,3) = H1error;
 end
 
-subplot(1,2,1) 
-plot(log(Error_hh(:,1)),log(Error_hh(:,2)),'o')
-title('Plot of L2error vs. Mesh Size')
-xlabel('log(hh)')
-ylabel('log(L2Error)')
-
-subplot(1,2,2) 
-plot(log(Error_hh(:,1)),log(Error_hh(:,3)),'o')
-title('Plot of H1error vs. Mesh Size')
-xlabel('log(hh)')
-ylabel('log(H1Error)')
+% subplot(1,2,1) 
+% plot(log(Error_hh(:,1)),log(Error_hh(:,2)),'o')
+% title('Plot of L2error vs. Mesh Size')
+% xlabel('log(hh)')
+% ylabel('log(L2Error)')
+% 
+% subplot(1,2,2) 
+% plot(log(Error_hh(:,1)),log(Error_hh(:,3)),'o')
+% title('Plot of H1error vs. Mesh Size')
+% xlabel('log(hh)')
+% ylabel('log(H1Error)')
 
 % EOF
