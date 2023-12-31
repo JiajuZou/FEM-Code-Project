@@ -1,6 +1,6 @@
 clear all; clc; clf;
 
-load("HEAT1000100.mat");
+load("HEAT1000008.mat");
 
 hh_x = 1.0 / n_el_x;
 hh_y = 1.0 / n_el_y;
