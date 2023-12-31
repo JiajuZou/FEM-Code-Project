@@ -20,10 +20,10 @@ n_int     = n_int_xi * n_int_eta;
 % FEM mesh settings
 n_en = 4;                   % 4-node quadrilateral element
 
-ele = [10,100];        % Different number of elements
-% for i = 1:length(ele)
-n_el_x = 4;                 % number of element in x-direction
-n_el_y = 4;                 % number of element in y-direction
+ele = [10,20,30,100];        % Different number of elements
+for i = 1:length(ele)
+n_el_x = ele(i);                 % number of element in x-direction
+n_el_y = ele(i);                 % number of element in y-direction
 n_el   = n_el_x * n_el_y;   % total number of element in 2D domain
 
 n_np_x = n_el_x + 1;        % number of node points in x-direction
@@ -65,34 +65,34 @@ end
 
 % Q(a) the whole D boundary
 % ID array
-% ID = zeros(n_np, 1);
-% counter = 1;
-% for ny = 2 : n_np_y - 1
-%   for nx = 2 : n_np_x - 1
-%     ID( (ny-1)*n_np_x + nx ) = counter;
-%     counter = counter + 1;
-%   end
-% end
-
-% Q(b) the D boundary and the N boundary
-% ID = 0 if nodes on D boundary, so the L and R sides are zeros
-% ID array
 ID = zeros(n_np, 1);
 counter = 1;
-for ny = 1 : n_np_y
+for ny = 2 : n_np_y - 1
   for nx = 2 : n_np_x - 1
     ID( (ny-1)*n_np_x + nx ) = counter;
     counter = counter + 1;
   end
 end
 
+% Q(b) the D boundary and the N boundary
+% ID = 0 if nodes on D boundary, so the L and R sides are zeros
+% ID array
+% ID = zeros(n_np, 1);
+% counter = 1;
+% for ny = 1 : n_np_y
+%   for nx = 2 : n_np_x - 1
+%     ID( (ny-1)*n_np_x + nx ) = counter;
+%     counter = counter + 1;
+%   end
+% end
+
 % Q(a) D boundary on the whole sides
-% n_eq = n_np - n_np_x * 2 - n_np_y * 2 + 4;
+n_eq = n_np - n_np_x * 2 - n_np_y * 2 + 4;
 
 % Q(b) D boundary on right and left sides, N boundary on top and bottom
 %sides, the 4 corner points are in D boundary only
 % the number of equations = number of nodes - number of D nodes
-n_eq = n_np - n_np_y * 2;
+% n_eq = n_np - n_np_y * 2;
 
 % Construct two matrixes to store the D and N boundary data
 % 1 ----0-----1                 1 ----1-----1
@@ -101,14 +101,14 @@ n_eq = n_np - n_np_y * 2;
 % 1 ----0-----1                 0 ----0-----0
 % 1 ----0-----1                 0 ----0-----0
 % 1 ----0-----1                 1 ----1-----1
-g_b = ones(n_np,1); % set g = 1 in this case
+g_b = zeros(n_np,1); % set g = 1 in this case
 for ny = 1 : n_np_y 
     for nx = 2 : n_np_x - 1 
         g_b((ny-1) * n_np_x + nx) = 0; % Make the L and R sides to be 1, the remaind to be 0
     end
 end
 
-h_b = ones(n_np,1); % set h = 1 in this case
+h_b = zeros(n_np,1); % set h = 1 in this case
 for ny = 2 : n_np_y - 1 
     for nx = 1 : n_np_x
         h_b((ny-1) * n_np_x + nx) = 0; % Make the T and B sides to be 1, the remaind to be 0
@@ -255,14 +255,14 @@ for ii = 1 : n_np
   else
     % g boundary data where ID = 0; 
     % the value should be the same with g_function
-    disp(ii) = 1; 
+    disp(ii) = g_b(ii); 
   end
 end
 
 % save the solution to file
 save("FEM_solution", "disp", "n_el_x", "n_el_y", "exact", "exact_x", "exact_y");
-% save(sprintf('FEM_solution_%d.mat', ele(i)), "disp", "n_el_x", "n_el_y", "exact", "exact_x", "exact_y");
+save(sprintf('FEM_solution_%d.mat', ele(i)), "disp", "n_el_x", "n_el_y", "exact", "exact_x", "exact_y");
 
-% end
+end
 
 % EOF

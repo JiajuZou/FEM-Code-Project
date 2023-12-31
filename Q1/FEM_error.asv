@@ -109,7 +109,7 @@ Error_hh(index,3) = H1error;
 end
 
 subplot(1,2,1) 
-plot(log(Error_hh(:,1)),log(Error_hh(:,2)),'o')
+plot(log(Error_hh(:,1)),log(Error_hh(:,2)),'o-')
 title('Plot of L2error vs. Mesh Size')
 xlabel('log(hh)')
 ylabel('log(L2Error)')
