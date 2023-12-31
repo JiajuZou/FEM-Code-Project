@@ -14,7 +14,7 @@ cap   = 1.0; % heat capacity
 alpha = 0.5;                % unconditionaly stable
 
 T_final = 10.0;             % time period T = 10
-dt      = 0.1;              % time step size
+dt      = 0.01;              % time step size
 t       = 0 : dt : T_final; % time sub-interval
 NN      = T_final / dt;     % number of time interval
 
@@ -29,8 +29,8 @@ n_int     = n_int_xi * n_int_eta;
 % FEM mesh settings
 n_en = 4;                   % 4-node quadrilateral element
 
-n_el_x = 10;               % number of element in x-direction
-n_el_y = 10;               % number of element in y-direction
+n_el_x = 200;               % number of element in x-direction
+n_el_y = 200;               % number of element in y-direction
 n_el   = n_el_x * n_el_y;   % total number of element in 2D domain
 
 n_np_x = n_el_x + 1;        % number of node points in x-direction
@@ -86,6 +86,7 @@ end
 n_eq = n_np - n_np_x * 2;
 
 for n = 1 : NN
+
     % Dirichlet boundary condition
     % Construct one matrix to store the g-data
     g_b = ones(n_np,1);
@@ -202,6 +203,7 @@ for n = 1 : NN
             end
         end
         
+        % Na * h = 0 all the time since h = 0 on the L and R sides
         for aa = 1 : n_en
             f_ele(aa) = f_ele(aa) + Nah(aa);
         end
@@ -249,7 +251,7 @@ for n = 1 : NN
     
     
     LEFT = M + alpha * dt * K;
-    
+
     % prediction
     tilde_d = dn + (1-alpha) * dt * vn;
     
