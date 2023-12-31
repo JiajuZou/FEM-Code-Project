@@ -10,8 +10,8 @@ exact_y = @(x,y) x*(1-x)*(1-2*y);
 f = @(x,y) -2*x*(x-1)-2*y*(y-1);
 
 % quadrature rule
-n_int_xi  = 3;              % number of quadrature points in xi-direction
-n_int_eta = 3;              % number of quadrature points in eta-direction
+n_int_xi  = 10;              % number of quadrature points in xi-direction
+n_int_eta = 10;              % number of quadrature points in eta-direction
 n_int_h   = 10;              % number of quadrature points on the Neumann boundary
 n_int     = n_int_xi * n_int_eta;
 [xi, eta, weight] = Gauss2D(n_int_xi, n_int_eta);
@@ -62,37 +62,37 @@ for ey = 1 : n_el_y
     IEN(4,ee) =  ey   * n_np_x + ex;
   end
 end
-
-% Q(a) the whole D boundary
-% ID array
-ID = zeros(n_np, 1);
-counter = 1;
-for ny = 2 : n_np_y - 1
-  for nx = 2 : n_np_x - 1
-    ID( (ny-1)*n_np_x + nx ) = counter;
-    counter = counter + 1;
-  end
-end
-
-% Q(b) the D boundary and the N boundary
-% ID = 0 if nodes on D boundary, so the L and R sides are zeros
-% ID array
+% 
+% % Q(a) the whole D boundary
+% % ID array
 % ID = zeros(n_np, 1);
 % counter = 1;
-% for ny = 1 : n_np_y
+% for ny = 2 : n_np_y - 1
 %   for nx = 2 : n_np_x - 1
 %     ID( (ny-1)*n_np_x + nx ) = counter;
 %     counter = counter + 1;
 %   end
 % end
 
+% Q(b) the D boundary and the N boundary
+% ID = 0 if nodes on D boundary, so the L and R sides are zeros
+% ID array
+ID = zeros(n_np, 1);
+counter = 1;
+for ny = 1 : n_np_y
+  for nx = 2 : n_np_x - 1
+    ID( (ny-1)*n_np_x + nx ) = counter;
+    counter = counter + 1;
+  end
+end
+
 % Q(a) D boundary on the whole sides
-n_eq = n_np - n_np_x * 2 - n_np_y * 2 + 4;
+% n_eq = n_np - n_np_x * 2 - n_np_y * 2 + 4;
 
 % Q(b) D boundary on right and left sides, N boundary on top and bottom
 %sides, the 4 corner points are in D boundary only
 % the number of equations = number of nodes - number of D nodes
-% n_eq = n_np - n_np_y * 2;
+n_eq = n_np - n_np_y * 2;
 
 % Construct two matrixes to store the D and N boundary data
 % 1 ----0-----1                 1 ----1-----1
@@ -101,14 +101,14 @@ n_eq = n_np - n_np_x * 2 - n_np_y * 2 + 4;
 % 1 ----0-----1                 0 ----0-----0
 % 1 ----0-----1                 0 ----0-----0
 % 1 ----0-----1                 1 ----1-----1
-g_b = zeros(n_np,1); % set g = 1 in this case
-for ny = 1 : n_np_y 
+g_b = ones(n_np,1); % set g = 1 in this case
+for ny = 2 : n_np_y - 1  
     for nx = 2 : n_np_x - 1 
         g_b((ny-1) * n_np_x + nx) = 0; % Make the L and R sides to be 1, the remaind to be 0
     end
 end
 
-h_b = zeros(n_np,1); % set h = 1 in this case
+h_b = ones(n_np,1); % set h = 1 in this case
 for ny = 2 : n_np_y - 1 
     for nx = 1 : n_np_x
         h_b((ny-1) * n_np_x + nx) = 0; % Make the T and B sides to be 1, the remaind to be 0

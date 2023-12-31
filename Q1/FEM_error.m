@@ -58,6 +58,7 @@ bottomL2 = 0.0;
 errorH1 = 0.0;
 bottomH1 = 0.0;
 
+
 for ee = 1 : n_el
     x_ele = x_coor( IEN(1:n_en, ee) );
     y_ele = y_coor( IEN(1:n_en, ee) );
